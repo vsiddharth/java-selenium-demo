@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title th:fragment="title (text)" th:text="${text}">Shop</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}"/>
+</head>
+<body>
+<header th:fragment="header (cartCount)">
+    <div class="topbar">
+        <a class="logo" th:href="@{/}">shop<span>.io</span></a>
+        <form class="search" action="#" method="get" onsubmit="return false;">
+            <input type="text" placeholder="Search (demo only)"/>
+            <button type="submit">Search</button>
+        </form>
+        <nav>
+            <a th:href="@{/orders}">Orders</a>
+            <a class="cart-link" th:href="@{/cart}">
+                Cart <span class="cart-badge" th:text="${cartCount}">0</span>
+            </a>
+        </nav>
+    </div>
+</header>
+<footer th:fragment="footer">
+    <p>Demo microservices app — product / user / order services aggregated by frontend-service.</p>
+</footer>
+</body>
+</html>

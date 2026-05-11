@@ -1,0 +1,16 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: order-service
+
+services:
+  product-url: ${PRODUCT_SERVICE_URL:http://localhost:8081}
+  user-url: ${USER_SERVICE_URL:http://localhost:8082}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

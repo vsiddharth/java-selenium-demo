@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>My Orders</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}"/>
+</head>
+<body>
+<div th:replace="~{fragments/layout :: header(${cartCount})}"></div>
+<main>
+    <h1>Orders</h1>
+    <form method="get" th:action="@{/orders}">
+        <label>User:
+            <select name="userId" onchange="this.form.submit()">
+                <option value="">— select user —</option>
+                <option th:each="u : ${users}" th:value="${u.id}"
+                        th:selected="${selectedUserId} == ${u.id}"
+                        th:text="${u.name}">User</option>
+            </select>
+        </label>
+    </form>
+
+    <div th:if="${orders != null}">
+        <p th:if="${#lists.isEmpty(orders)}">No orders yet for this user.</p>
+        <div th:each="o : ${orders}" class="order-card">
+            <h3 th:text="${o.id}">id</h3>
+            <p>Status: <span th:text="${o.status}">CONFIRMED</span> — Placed: <span th:text="${o.createdAt}">date</span></p>
+            <table class="cart-table">
+                <thead><tr><th>Item</th><th>Qty</th><th>Line total</th></tr></thead>
+                <tbody>
+                <tr th:each="l : ${o.lines}">
+                    <td th:text="${l.productName}">Name</td>
+                    <td th:text="${l.quantity}">1</td>
+                    <td>$<span th:text="${l.lineTotal}">0.00</span></td>
+                </tr>
+                </tbody>
+                <tfoot>
+                <tr><td colspan="2" class="right"><strong>Total</strong></td>
+                    <td><strong>$<span th:text="${o.total}">0.00</span></strong></td></tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</main>
+<div th:replace="~{fragments/layout :: footer}"></div>
+</body>
+</html>

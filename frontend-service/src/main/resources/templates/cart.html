@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Your Cart</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}"/>
+</head>
+<body>
+<div th:replace="~{fragments/layout :: header(${cartCount})}"></div>
+<main>
+    <h1>Your Cart</h1>
+    <div th:if="${flash}" class="flash" th:text="${flash}"></div>
+    <p th:if="${#lists.isEmpty(rows)}">Your cart is empty. <a th:href="@{/}">Browse products</a>.</p>
+    <table th:if="${not #lists.isEmpty(rows)}" class="cart-table">
+        <thead>
+        <tr>
+            <th>Item</th><th>Qty</th><th>Unit</th><th>Line total</th><th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="r : ${rows}">
+            <td th:text="${r.name}">Item</td>
+            <td th:text="${r.quantity}">1</td>
+            <td>$<span th:text="${r.price}">0.00</span></td>
+            <td>$<span th:text="${r.lineTotal}">0.00</span></td>
+            <td>
+                <form th:action="@{/cart/remove}" method="post">
+                    <input type="hidden" name="productId" th:value="${r.id}"/>
+                    <button type="submit" class="btn-link">Remove</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+        <tfoot>
+        <tr>
+            <td colspan="3" class="right"><strong>Order total</strong></td>
+            <td colspan="2"><strong>$<span th:text="${total}">0.00</span></strong></td>
+        </tr>
+        </tfoot>
+    </table>
+
+    <div th:if="${not #lists.isEmpty(rows)}" class="checkout">
+        <form th:action="@{/checkout}" method="post">
+            <label>Ship to:
+                <select name="userId" required>
+                    <option th:each="u : ${users}" th:value="${u.id}"
+                            th:text="${u.name + ' — ' + u.shippingAddress}">User</option>
+                </select>
+            </label>
+            <button type="submit" class="btn primary">Place order</button>
+        </form>
+    </div>
+</main>
+<div th:replace="~{fragments/layout :: footer}"></div>
+</body>
+</html>

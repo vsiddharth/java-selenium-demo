@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>shop.io — Home</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}"/>
+</head>
+<body>
+<div th:replace="~{fragments/layout :: header(${cartCount})}"></div>
+<main>
+    <h1>Today's Picks</h1>
+    <div th:if="${flash}" class="flash" th:text="${flash}"></div>
+    <div class="grid">
+        <div class="card" th:each="p : ${products}">
+            <a th:href="@{'/products/' + ${p.id}}">
+                <img th:src="${p.imageUrl}" th:alt="${p.name}"/>
+            </a>
+            <div class="card-body">
+                <a class="title" th:href="@{'/products/' + ${p.id}}" th:text="${p.name}">Name</a>
+                <p class="price">$<span th:text="${p.price}">0.00</span></p>
+                <p class="stock" th:text="'In stock: ' + ${p.stock}">In stock: 0</p>
+                <form th:action="@{/cart/add}" method="post">
+                    <input type="hidden" name="productId" th:value="${p.id}"/>
+                    <input type="number" name="quantity" value="1" min="1" max="10"/>
+                    <button type="submit" class="btn">Add to cart</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+<div th:replace="~{fragments/layout :: footer}"></div>
+</body>
+</html>

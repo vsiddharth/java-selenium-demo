@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Order placed</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}"/>
+</head>
+<body>
+<div th:replace="~{fragments/layout :: header(0)}"></div>
+<main>
+    <h1>Thanks, <span th:text="${order.userName}">friend</span>!</h1>
+    <p>Order <strong th:text="${order.id}">id</strong> confirmed.</p>
+    <table class="cart-table">
+        <thead>
+        <tr><th>Item</th><th>Qty</th><th>Unit</th><th>Line total</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="l : ${order.lines}">
+            <td th:text="${l.productName}">Name</td>
+            <td th:text="${l.quantity}">1</td>
+            <td>$<span th:text="${l.unitPrice}">0.00</span></td>
+            <td>$<span th:text="${l.lineTotal}">0.00</span></td>
+        </tr>
+        </tbody>
+        <tfoot>
+        <tr>
+            <td colspan="3" class="right"><strong>Total</strong></td>
+            <td><strong>$<span th:text="${order.total}">0.00</span></strong></td>
+        </tr>
+        </tfoot>
+    </table>
+    <p><a class="btn" th:href="@{/}">Keep shopping</a>
+       <a class="btn" th:href="@{'/orders?userId=' + ${order.userId}}">View my orders</a></p>
+</main>
+<div th:replace="~{fragments/layout :: footer}"></div>
+</body>
+</html>

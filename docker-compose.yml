@@ -1,0 +1,46 @@
+services:
+  product-service:
+    image: shop/product-service:1.0.0
+    build:
+      context: .
+      dockerfile: product-service/Dockerfile
+    ports:
+      - "9081:8081"
+
+  user-service:
+    image: shop/user-service:1.0.0
+    build:
+      context: .
+      dockerfile: user-service/Dockerfile
+    ports:
+      - "9082:8082"
+
+  order-service:
+    image: shop/order-service:1.0.0
+    build:
+      context: .
+      dockerfile: order-service/Dockerfile
+    environment:
+      PRODUCT_SERVICE_URL: http://product-service:8081
+      USER_SERVICE_URL: http://user-service:8082
+    depends_on:
+      - product-service
+      - user-service
+    ports:
+      - "9083:8083"
+
+  frontend-service:
+    image: shop/frontend-service:1.0.0
+    build:
+      context: .
+      dockerfile: frontend-service/Dockerfile
+    environment:
+      PRODUCT_SERVICE_URL: http://product-service:8081
+      USER_SERVICE_URL: http://user-service:8082
+      ORDER_SERVICE_URL: http://order-service:8083
+    depends_on:
+      - product-service
+      - user-service
+      - order-service
+    ports:
+      - "9080:8080"
