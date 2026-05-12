@@ -2,7 +2,7 @@
 
 A minimal Spring Boot microservices demo that mimics a tiny slice of Amazon:
 browse products, add to cart, pick a shipping address (user), place an order,
-and see your past orders.
+and see your past orders..
 
 ## Architecture
 
