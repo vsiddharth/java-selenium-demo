@@ -1,0 +1,109 @@
+name: Selenium UI Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  selenium:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build all service jars (skip unit tests)
+        run: mvn -B -T 1C -DskipTests package
+
+      - name: Start backend services
+        run: |
+          set -e
+          nohup java -jar product-service/target/product-service-1.0.0.jar > product-service.log 2>&1 &
+          echo "PRODUCT_PID=$!" >> "$GITHUB_ENV"
+          nohup java -jar user-service/target/user-service-1.0.0.jar > user-service.log 2>&1 &
+          echo "USER_PID=$!" >> "$GITHUB_ENV"
+          nohup java -jar order-service/target/order-service-1.0.0.jar > order-service.log 2>&1 &
+          echo "ORDER_PID=$!" >> "$GITHUB_ENV"
+          nohup java -jar frontend-service/target/frontend-service-1.0.0.jar > frontend-service.log 2>&1 &
+          echo "FRONTEND_PID=$!" >> "$GITHUB_ENV"
+
+      - name: Wait for services to be ready
+        run: |
+          set -e
+          wait_for() {
+            local url=$1
+            for i in $(seq 1 60); do
+              if curl -fsS -o /dev/null "$url"; then
+                echo "ready: $url"
+                return 0
+              fi
+              sleep 1
+            done
+            echo "FAILED waiting for $url" >&2
+            return 1
+          }
+          wait_for http://localhost:8081/products
+          wait_for http://localhost:8082/users
+          wait_for http://localhost:8083/orders?userId=u-1
+          wait_for http://localhost:8080/
+
+      - name: Run Selenium suite (headless Chrome)
+        run: |
+          mvn -B -Pselenium -pl selenium-tests test \
+            -Dapp.baseUrl=http://localhost:8080 \
+            -Dbrowser=chrome \
+            -Dheadless=true
+
+      - name: Tail service logs on failure
+        if: failure()
+        run: |
+          for f in *.log; do
+            echo "===== $f (last 100 lines) ====="
+            tail -100 "$f" || true
+          done
+
+      - name: Upload ExtentReport
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: extent-report
+          path: selenium-tests/target/extent-report/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload Surefire reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: selenium-surefire-reports
+          path: selenium-tests/target/surefire-reports/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload service logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: service-logs
+          path: '*.log'
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Stop services
+        if: always()
+        run: |
+          for var in FRONTEND_PID ORDER_PID USER_PID PRODUCT_PID; do
+            pid="${!var:-}"
+            if [ -n "$pid" ]; then
+              kill "$pid" 2>/dev/null || true
+            fi
+          done

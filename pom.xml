@@ -31,4 +31,15 @@
         <module>order-service</module>
         <module>frontend-service</module>
     </modules>
+
+    <profiles>
+        <!-- selenium-tests is opt-in: requires the app to be running.
+             Activate with: mvn -Pselenium verify -pl selenium-tests -am -DskipTests=false -->
+        <profile>
+            <id>selenium</id>
+            <modules>
+                <module>selenium-tests</module>
+            </modules>
+        </profile>
+    </profiles>
 </project>

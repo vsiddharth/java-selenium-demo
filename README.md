@@ -86,6 +86,53 @@ curl -X POST localhost:8083/orders \
 curl 'localhost:8083/orders?userId=u-1'
 ```
 
+## Selenium UI tests
+
+A separate `selenium-tests` Maven module runs end-to-end UI tests with
+Selenium 4 + TestNG + ExtentReports against a running app. Page Object
+Model lives under `src/test/java/com/example/shop/selenium/pages/`.
+
+The module is opt-in (it needs the app running) — activate the `selenium`
+profile to include it.
+
+### Prerequisites
+
+- App running at some URL (default expects `http://localhost:8080`)
+- Chrome (default) or Firefox installed locally
+
+### Run from CLI
+
+```bash
+# 1. Start the app (any way — docker compose, native, etc.)
+docker compose up -d
+# (docker compose maps to 9080–9083; native run uses 8080–8083)
+
+# 2. Run the suite
+mvn -Pselenium -pl selenium-tests test \
+    -Dapp.baseUrl=http://localhost:9080 \
+    -Dheadless=true
+```
+
+ExtentReport HTML lands at
+`selenium-tests/target/extent-report/ExtentReport-*.html`
+(open it in a browser).
+
+### Run from IDE (IntelliJ / Eclipse)
+
+1. Right-click `selenium-tests/src/test/resources/testng.xml` → Run
+2. Or right-click any test class → Run as TestNG test
+3. Override base URL via Run Configuration **VM options**:
+   `-Dapp.baseUrl=http://localhost:9080 -Dheadless=false`
+
+### Run on GitHub Actions
+
+The `.github/workflows/selenium.yml` workflow:
+1. Builds all four service jars
+2. Starts each service as a background process
+3. Waits for `/products`, `/users`, `/orders`, and the frontend to respond
+4. Runs the Selenium suite headless against `http://localhost:8080`
+5. Uploads the ExtentReport, Surefire reports, and service logs as artifacts
+
 ## Notes
 
 - The `order-service` calls `product-service` to fetch price + reserve stock,
