@@ -22,6 +22,7 @@ public class AddToCartTest extends BaseTest {
 
     @Test(description = "Add 2 of a specific product from the product detail page")
     public void addTwoEchoDotsFromProductDetail() {
+        System.out.println("Running addTwoEchoDotsFromProductDetail");
         HomePage home = new HomePage(driver);
         ProductDetailPage detail = home.openProductByName("Echo Dot (5th Gen)");
         Assert.assertEquals(detail.productName(), "Echo Dot (5th Gen)");
